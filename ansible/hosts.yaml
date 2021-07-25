@@ -1,0 +1,15 @@
+all:
+  hosts:
+    control-plane:
+      ansible_host: <host>
+      ansible_user: <user>
+    worker1:
+      ansible_host: <host>
+      ansible_user: <user>
+  children:
+    master:
+      hosts:
+        control-plane:
+    slave:
+      hosts:
+        worker1:
