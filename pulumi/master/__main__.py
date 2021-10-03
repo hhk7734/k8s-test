@@ -110,7 +110,7 @@ k8s_key_pair = aws.ec2.KeyPair(
 )
 
 k8s_master_0 = aws.ec2.Instance(
-    "k8sMaster0",
+    "k8s_master_0",
     ami="ami-090717c950a5c34d3",  # Ubuntu Server 18.04 LTS
     instance_type="t3.medium",
     associate_public_ip_address=True,
@@ -125,7 +125,7 @@ k8s_master_0 = aws.ec2.Instance(
     vpc_security_group_ids=[k8s_master_security_group.id],
     key_name=k8s_key_pair.key_name,
     tags={
-        "Name": "k8sMaster0",
+        "Name": "k8s_master_0",
         "Stack": stack,
         "Owner": "hhk7734",
     },
