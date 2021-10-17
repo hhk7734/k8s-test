@@ -30,3 +30,13 @@
         ansible_user: ubuntu
       import_role:
         name: docker
+
+    - name: setup kubeadm
+      become: true
+      delegate_to: '{{ k8s_master_0_public_ip }}'
+      delegate_facts: true
+      vars:
+        ansible_ssh_private_key_file: '{{ keypair_path }}'
+        ansible_user: ubuntu
+      import_role:
+        name: kubeadm
