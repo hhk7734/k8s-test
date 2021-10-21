@@ -2,28 +2,31 @@
 - hosts: localhost
   vars:
     keypair_path: '~/.ssh/hhk7734.pem'
+    pod_network_cidr: '10.235.0.0'
   tasks:
     - name: gather EC2 instance public IP created by Pulumi
-      shell: pulumi stack output k8s_master_0_public_ip
-      register: pulumi_stack_k8s_master_0_public_ip
+      shell: pulumi stack output -j
+      register: pulumi_stack_output
 
     - set_fact:
-        k8s_master_0_public_ip: '{{ pulumi_stack_k8s_master_0_public_ip.stdout }}'
+        pulumi_info: '{{ pulumi_stack_output.stdout | from_json }}'
 
     - debug:
-        msg: 'The public IP of the Pulumi created EC2 instance is: {{ k8s_master_0_public_ip }}'
+        msg:
+          - 'The public IP of the Pulumi created EC2 instance is: {{ pulumi_info.k8s_master_0_public_ip }}'
+          - 'The private IP of the Pulumi created EC2 instance is: {{ pulumi_info.k8s_master_0_private_ip }}'
 
     - name: wait 300 seconds for port 22 to become open and contain "SSH" - then the SSH connection should work afterwards
       wait_for:
         port: 22
-        host: '{{ k8s_master_0_public_ip }}'
+        host: '{{ pulumi_info.k8s_master_0_public_ip }}'
         search_regex: SSH
         delay: 10
         timeout: 320
 
     - name: setup docker
       become: true
-      delegate_to: '{{ k8s_master_0_public_ip }}'
+      delegate_to: '{{ pulumi_info.k8s_master_0_public_ip }}'
       delegate_facts: true
       vars:
         ansible_ssh_private_key_file: '{{ keypair_path }}'
@@ -33,10 +36,19 @@
 
     - name: setup kubeadm
       become: true
-      delegate_to: '{{ k8s_master_0_public_ip }}'
+      delegate_to: '{{ pulumi_info.k8s_master_0_public_ip }}'
       delegate_facts: true
       vars:
         ansible_ssh_private_key_file: '{{ keypair_path }}'
         ansible_user: ubuntu
       import_role:
         name: kubeadm
+
+    - name: setup calico
+      delegate_to: '{{ pulumi_info.k8s_master_0_public_ip }}'
+      delegate_facts: true
+      vars:
+        ansible_ssh_private_key_file: '{{ keypair_path }}'
+        ansible_user: ubuntu
+      import_role:
+        name: calico
