@@ -132,3 +132,4 @@ k8s_master_0 = aws.ec2.Instance(
 )
 
 pulumi.export("k8s_master_0_public_ip", k8s_master_0.public_ip)
+pulumi.export("k8s_master_0_private_ip", k8s_master_0.private_ip)
