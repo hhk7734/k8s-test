@@ -62,7 +62,7 @@
   command: sysctl --system
 
 - name: initialize the cluster with kubeadm
-  shell: kubeadm init --pod-network-cidr=10.235.0.0/16 >> kubeadm_init.txt
+  shell: kubeadm init --pod-network-cidr={{ pod_network_cidr }}/16 >> kubeadm_init.txt
   args:
     chdir: /home/{{ ansible_user }}
     creates: kubeadm_init.txt
