@@ -38,6 +38,7 @@
   lineinfile:
     path: /etc/modules-load.d/k8s.conf
     line: br_netfilter
+    mode: 0644
     create: yes
 
 - name: modprobe br_netfilter
@@ -47,13 +48,36 @@
   lineinfile:
     path: /etc/sysctl.d/k8s.conf
     line: 'net.bridge.bridge-nf-call-ip6tables = 1'
+    mode: 0644
     create: yes
 
 - name: add netbridge config ip4
   lineinfile:
     path: /etc/sysctl.d/k8s.conf
     line: 'net.bridge.bridge-nf-call-iptables = 1'
+    mode: 0644
     create: yes
 
 - name: update sysctl
   command: sysctl --system
+
+- name: initialize the cluster with kubeadm
+  shell: kubeadm init --pod-network-cidr=10.235.0.0/16 >> kubeadm_init.txt
+  args:
+    chdir: /home/{{ ansible_user }}
+    creates: kubeadm_init.txt
+
+- name: create /home/{{ ansible_user }}/.kube directory
+  file:
+    path: /home/{{ ansible_user }}/.kube
+    state: directory
+    mode: 0755
+
+- name: copy admin.conf to {{ ansible_user }}'s kube config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/{{ ansible_user }}/.kube/config
+    remote_src: yes
+    mode: 0644
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
