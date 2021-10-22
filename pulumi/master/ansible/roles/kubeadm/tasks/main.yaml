@@ -60,24 +60,3 @@
 
 - name: update sysctl
   command: sysctl --system
-
-- name: initialize the cluster with kubeadm
-  shell: kubeadm init --pod-network-cidr={{ pod_network_cidr }}/16 >> kubeadm_init.txt
-  args:
-    chdir: /home/{{ ansible_user }}
-    creates: kubeadm_init.txt
-
-- name: create /home/{{ ansible_user }}/.kube directory
-  file:
-    path: /home/{{ ansible_user }}/.kube
-    state: directory
-    mode: 0755
-
-- name: copy admin.conf to {{ ansible_user }}'s kube config
-  copy:
-    src: /etc/kubernetes/admin.conf
-    dest: /home/{{ ansible_user }}/.kube/config
-    remote_src: yes
-    mode: 0644
-    owner: '{{ ansible_user }}'
-    group: '{{ ansible_user }}'
