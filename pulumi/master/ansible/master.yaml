@@ -22,7 +22,7 @@
         port: 22
         host: '{{ pulumi_info.k8s_master_0_public_ip }}'
         search_regex: SSH
-        delay: 10
+        delay: 5
         timeout: 320
 
     - name: setup docker
@@ -75,11 +75,31 @@
         owner: '{{ remote_user }}'
         group: '{{ remote_user }}'
 
-    - name: setup calico
+    - name: get token
+      become: true
       delegate_to: '{{ pulumi_info.k8s_master_0_public_ip }}'
       delegate_facts: true
-      vars:
-        ansible_ssh_private_key_file: '{{ keypair_path }}'
-        ansible_user: ubuntu
-      import_role:
-        name: calico
+      command: kubeadm token list -o json
+      register: kubeadm_token
+
+    - name: save token
+      copy:
+        dest: '{{ playbook_dir }}/k8s/kubeadm_token.json'
+        content: '{{ kubeadm_token.stdout  }}'
+        mode: 0644
+
+    - name: get hash
+      become: true
+      delegate_to: '{{ pulumi_info.k8s_master_0_public_ip }}'
+      delegate_facts: true
+      shell: |
+        openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt \
+        | openssl rsa -pubin -outform der 2>/dev/null \
+        | openssl dgst -sha256 -hex | sed 's/^.* //'
+      register: kubeadm_hash
+
+    - name: save hash
+      copy:
+        dest: '{{ playbook_dir }}/k8s/kubeadm_hash.txt'
+        content: '{{ kubeadm_hash.stdout }}'
+        mode: 0644
