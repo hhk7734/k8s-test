@@ -85,6 +85,12 @@ k8s_common_security_group = aws.ec2.SecurityGroup(
             protocol="tcp",
             self=True,
         ),
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=0,
+            to_port=65535,
+            protocol="udp",
+            self=True,
+        ),
     ],
     egress=[],
     tags={
