@@ -1,0 +1,72 @@
+---
+- hosts: localhost
+  vars:
+    keypair_path: '~/.ssh/hhk7734.pem'
+    pod_network_cidr: '10.235.0.0'
+    remote_user: ubuntu
+  tasks:
+    - name: gather EC2 instance public IP created by Pulumi
+      shell: pulumi stack output -j
+      register: pulumi_stack_output
+
+    - set_fact:
+        pulumi_info: '{{ pulumi_stack_output.stdout | from_json }}'
+
+    - set_fact:
+        worker_public_ip: '{{ pulumi_info.k8s_worker_1_public_ip }}'
+        worker_private_ip: '{{ pulumi_info.k8s_worker_1_private_ip }}'
+
+    - debug:
+        msg:
+          - 'The public IP of the Pulumi created EC2 instance is: {{ worker_public_ip  }}'
+          - 'The private IP of the Pulumi created EC2 instance is: {{ worker_private_ip }}'
+
+    - name: wait 300 seconds for port 22 to become open and contain "SSH" - then the SSH connection should work afterwards
+      wait_for:
+        port: 22
+        host: '{{ worker_public_ip }}'
+        search_regex: SSH
+        delay: 5
+        timeout: 300
+
+    - name: setup docker
+      become: true
+      delegate_to: '{{ worker_public_ip }}'
+      delegate_facts: true
+      vars:
+        ansible_ssh_private_key_file: '{{ keypair_path }}'
+        ansible_user: '{{ remote_user }}'
+      import_role:
+        name: docker
+
+    - name: setup kubeadm
+      become: true
+      delegate_to: '{{ worker_public_ip }}'
+      delegate_facts: true
+      vars:
+        ansible_ssh_private_key_file: '{{ keypair_path }}'
+        ansible_user: '{{ remote_user }}'
+      import_role:
+        name: kubeadm
+
+    - name: get kubeadm token
+      command: cat {{ playbook_dir }}/k8s/kubeadm_token.json
+      register: kubeadm_token
+
+    - set_fact:
+        kubeadm_token_json: '{{ kubeadm_token.stdout | from_json }}'
+
+    - name: get kubeadm_hash
+      command: cat {{ playbook_dir }}/k8s/kubeadm_hash.txt
+      register: kubeadm_hash
+
+    - name: join kubeadm
+      become: true
+      delegate_to: '{{ worker_public_ip }}'
+      delegate_facts: true
+      vars:
+        ansible_ssh_private_key_file: '{{ keypair_path }}'
+        ansible_user: '{{ remote_user }}'
+      command: kubeadm join {{ pulumi_info.k8s_master_0_private_ip }}:6443 \
+        --token {{ kubeadm_token_json.token }} \
+        --discovery-token-ca-cert-hash sha256:{{ kubeadm_hash.stdout }}
