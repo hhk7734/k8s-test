@@ -68,6 +68,33 @@ k8s_route_table_association_0 = aws.ec2.RouteTableAssociation(
     route_table_id=k8s_route_table_0.id,
 )
 
+k8s_common_security_group = aws.ec2.SecurityGroup(
+    "k8s_common_security_group",
+    description="k8s Common Security Group",
+    vpc_id=k8s_vpc.id,
+    ingress=[
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=-1,
+            to_port=-1,
+            protocol="icmp",
+            self=True,
+        ),
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=0,
+            to_port=65535,
+            protocol="tcp",
+            self=True,
+        ),
+    ],
+    egress=[],
+    tags={
+        "Name": "k8s_common_security_group",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
+
 k8s_master_security_group = aws.ec2.SecurityGroup(
     "k8s_master_security_group",
     description="k8s Master Security Group",
@@ -76,6 +103,18 @@ k8s_master_security_group = aws.ec2.SecurityGroup(
         aws.ec2.SecurityGroupIngressArgs(
             from_port=22,
             to_port=22,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=80,
+            to_port=80,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=433,
+            to_port=433,
             protocol="tcp",
             cidr_blocks=["0.0.0.0/0"],
         ),
@@ -90,6 +129,39 @@ k8s_master_security_group = aws.ec2.SecurityGroup(
     ],
     tags={
         "Name": "k8s_master_security_group",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
+k8s_worker_security_group = aws.ec2.SecurityGroup(
+    "k8s_worker_security_group",
+    description="k8s Master Security Group",
+    vpc_id=k8s_vpc.id,
+    ingress=[
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=22,
+            to_port=22,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=30000,
+            to_port=32767,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+    ],
+    egress=[
+        aws.ec2.SecurityGroupEgressArgs(
+            from_port=0,
+            to_port=0,
+            protocol="-1",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+    ],
+    tags={
+        "Name": "k8s_worker_security_group",
         "Stack": stack,
         "Owner": "hhk7734",
     },
@@ -122,7 +194,10 @@ k8s_master_0 = aws.ec2.Instance(
         volume_type="gp2",
         volume_size=50,
     ),
-    vpc_security_group_ids=[k8s_master_security_group.id],
+    vpc_security_group_ids=[
+        k8s_common_security_group.id,
+        k8s_master_security_group.id,
+    ],
     key_name=k8s_key_pair.key_name,
     tags={
         "Name": "k8s_master_0",
@@ -131,5 +206,34 @@ k8s_master_0 = aws.ec2.Instance(
     },
 )
 
+k8s_worker = []
+for i in range(2):
+    k8s_worker.append(
+        aws.ec2.Instance(
+            f"k8s_worker_{i}",
+            ami="ami-090717c950a5c34d3",  # Ubuntu Server 18.04 LTS
+            instance_type="t3.large",
+            associate_public_ip_address=True,
+            subnet_id=k8s_subnet_0.id,
+            root_block_device=aws.ec2.InstanceRootBlockDeviceArgs(
+                volume_type="gp2",
+                volume_size=30,
+            ),
+            vpc_security_group_ids=[
+                k8s_common_security_group.id,
+                k8s_worker_security_group.id,
+            ],
+            key_name=k8s_key_pair.key_name,
+            tags={
+                "Name": f"k8s_worker_{i}",
+                "Stack": stack,
+                "Owner": "hhk7734",
+            },
+        )
+    )
+
 pulumi.export("k8s_master_0_public_ip", k8s_master_0.public_ip)
 pulumi.export("k8s_master_0_private_ip", k8s_master_0.private_ip)
+for i in range(2):
+    pulumi.export(f"k8s_worker_{i}_public_ip", k8s_worker[i].public_ip)
+    pulumi.export(f"k8s_worker_{i}_private_ip", k8s_worker[i].private_ip)
