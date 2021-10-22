@@ -3,6 +3,7 @@
   vars:
     keypair_path: '~/.ssh/hhk7734.pem'
     pod_network_cidr: '10.235.0.0'
+    remote_user: ubuntu
   tasks:
     - name: gather EC2 instance public IP created by Pulumi
       shell: pulumi stack output -j
@@ -30,7 +31,7 @@
       delegate_facts: true
       vars:
         ansible_ssh_private_key_file: '{{ keypair_path }}'
-        ansible_user: ubuntu
+        ansible_user: '{{ remote_user }}'
       import_role:
         name: docker
 
@@ -40,9 +41,39 @@
       delegate_facts: true
       vars:
         ansible_ssh_private_key_file: '{{ keypair_path }}'
-        ansible_user: ubuntu
+        ansible_user: '{{ remote_user }}'
       import_role:
         name: kubeadm
+
+    - name: initialize the cluster with kubeadm
+      become: true
+      delegate_to: '{{ pulumi_info.k8s_master_0_public_ip }}'
+      delegate_facts: true
+      shell: kubeadm init --pod-network-cidr={{ pod_network_cidr }}/16 >> kubeadm_init.txt
+      args:
+        chdir: /home/{{ remote_user }}
+        creates: kubeadm_init.txt
+
+    - name: create /home/{{ remote_user }}/.kube directory
+      become: true
+      delegate_to: '{{ pulumi_info.k8s_master_0_public_ip }}'
+      delegate_facts: true
+      file:
+        path: /home/{{ remote_user }}/.kube
+        state: directory
+        mode: 0755
+
+    - name: copy admin.conf to {{ remote_user }}'s kube config
+      become: true
+      delegate_to: '{{ pulumi_info.k8s_master_0_public_ip }}'
+      delegate_facts: true
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/{{ remote_user }}/.kube/config
+        remote_src: yes
+        mode: 0644
+        owner: '{{ remote_user }}'
+        group: '{{ remote_user }}'
 
     - name: setup calico
       delegate_to: '{{ pulumi_info.k8s_master_0_public_ip }}'
