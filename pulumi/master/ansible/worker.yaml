@@ -13,8 +13,8 @@
         pulumi_info: '{{ pulumi_stack_output.stdout | from_json }}'
 
     - set_fact:
-        worker_public_ip: '{{ pulumi_info.k8s_worker_1_public_ip }}'
-        worker_private_ip: '{{ pulumi_info.k8s_worker_1_private_ip }}'
+        worker_public_ip: '{{ pulumi_info.k8s_worker_0_public_ip }}'
+        worker_private_ip: '{{ pulumi_info.k8s_worker_0_private_ip }}'
 
     - debug:
         msg:

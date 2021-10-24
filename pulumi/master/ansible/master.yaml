@@ -49,7 +49,9 @@
       become: true
       delegate_to: '{{ pulumi_info.k8s_master_0_public_ip }}'
       delegate_facts: true
-      shell: kubeadm init --pod-network-cidr={{ pod_network_cidr }}/16 >> kubeadm_init.txt
+      shell: |
+        kubeadm init \
+          --pod-network-cidr={{ pod_network_cidr }}/16 >> kubeadm_init.txt
       args:
         chdir: /home/{{ remote_user }}
         creates: kubeadm_init.txt
