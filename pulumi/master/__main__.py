@@ -74,21 +74,9 @@ k8s_common_security_group = aws.ec2.SecurityGroup(
     vpc_id=k8s_vpc.id,
     ingress=[
         aws.ec2.SecurityGroupIngressArgs(
-            from_port=-1,
-            to_port=-1,
-            protocol="icmp",
-            self=True,
-        ),
-        aws.ec2.SecurityGroupIngressArgs(
             from_port=0,
-            to_port=65535,
-            protocol="tcp",
-            self=True,
-        ),
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=0,
-            to_port=65535,
-            protocol="udp",
+            to_port=0,
+            protocol="all",
             self=True,
         ),
     ],
@@ -193,9 +181,6 @@ k8s_master_0 = aws.ec2.Instance(
     instance_type="t3.medium",
     associate_public_ip_address=True,
     subnet_id=k8s_subnet_0.id,
-    # credit_specification=aws.ec2.InstanceCreditSpecificationArgs(
-    #     cpu_credits="unlimited",
-    # ),
     root_block_device=aws.ec2.InstanceRootBlockDeviceArgs(
         volume_type="gp2",
         volume_size=50,
