@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pulumi
@@ -161,6 +162,150 @@ k8s_worker_security_group = aws.ec2.SecurityGroup(
     },
 )
 
+k8s_master_iam_role = aws.iam.Role(
+    "k8s_master_iam_role",
+    assume_role_policy=json.dumps(
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "sts:AssumeRole",
+                    "Principal": {"Service": "ec2.amazonaws.com"},
+                    "Effect": "Allow",
+                    "Sid": "",
+                }
+            ],
+        }
+    ),
+    tags={
+        "Name": "k8s_master_iam_role",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
+k8s_worker_iam_role = aws.iam.Role(
+    "k8s_worker_iam_role",
+    assume_role_policy=json.dumps(
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "sts:AssumeRole",
+                    "Principal": {"Service": "ec2.amazonaws.com"},
+                    "Effect": "Allow",
+                    "Sid": "",
+                }
+            ],
+        }
+    ),
+    tags={
+        "Name": "k8s_worker_iam_role",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
+k8s_master_iam_policy = aws.iam.RolePolicy(
+    "k8s_master_iam_policy",
+    role=k8s_master_iam_role.id,
+    policy=json.dumps(
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "autoscaling:DescribeAutoScalingGroups",
+                        "autoscaling:DescribeLaunchConfigurations",
+                        "autoscaling:DescribeTags",
+                        "ec2:DescribeInstances",
+                        "ec2:DescribeRegions",
+                        "ec2:DescribeRouteTables",
+                        "ec2:DescribeSecurityGroups",
+                        "ec2:DescribeSubnets",
+                        "ec2:DescribeVolumes",
+                        "ec2:CreateSecurityGroup",
+                        "ec2:CreateTags",
+                        "ec2:CreateVolume",
+                        "ec2:ModifyInstanceAttribute",
+                        "ec2:ModifyVolume",
+                        "ec2:AttachVolume",
+                        "ec2:AuthorizeSecurityGroupIngress",
+                        "ec2:CreateRoute",
+                        "ec2:DeleteRoute",
+                        "ec2:DeleteSecurityGroup",
+                        "ec2:DeleteVolume",
+                        "ec2:DetachVolume",
+                        "ec2:RevokeSecurityGroupIngress",
+                        "ec2:DescribeVpcs",
+                        "elasticloadbalancing:AddTags",
+                        "elasticloadbalancing:AttachLoadBalancerToSubnets",
+                        "elasticloadbalancing:ApplySecurityGroupsToLoadBalancer",
+                        "elasticloadbalancing:CreateLoadBalancer",
+                        "elasticloadbalancing:CreateLoadBalancerPolicy",
+                        "elasticloadbalancing:CreateLoadBalancerListeners",
+                        "elasticloadbalancing:ConfigureHealthCheck",
+                        "elasticloadbalancing:DeleteLoadBalancer",
+                        "elasticloadbalancing:DeleteLoadBalancerListeners",
+                        "elasticloadbalancing:DescribeLoadBalancers",
+                        "elasticloadbalancing:DescribeLoadBalancerAttributes",
+                        "elasticloadbalancing:DetachLoadBalancerFromSubnets",
+                        "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+                        "elasticloadbalancing:ModifyLoadBalancerAttributes",
+                        "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+                        "elasticloadbalancing:SetLoadBalancerPoliciesForBackendServer",
+                        "elasticloadbalancing:AddTags",
+                        "elasticloadbalancing:CreateListener",
+                        "elasticloadbalancing:CreateTargetGroup",
+                        "elasticloadbalancing:DeleteListener",
+                        "elasticloadbalancing:DeleteTargetGroup",
+                        "elasticloadbalancing:DescribeListeners",
+                        "elasticloadbalancing:DescribeLoadBalancerPolicies",
+                        "elasticloadbalancing:DescribeTargetGroups",
+                        "elasticloadbalancing:DescribeTargetHealth",
+                        "elasticloadbalancing:ModifyListener",
+                        "elasticloadbalancing:ModifyTargetGroup",
+                        "elasticloadbalancing:RegisterTargets",
+                        "elasticloadbalancing:DeregisterTargets",
+                        "elasticloadbalancing:SetLoadBalancerPoliciesOfListener",
+                        "iam:CreateServiceLinkedRole",
+                        "kms:DescribeKey",
+                    ],
+                    "Resource": ["*"],
+                }
+            ],
+        }
+    ),
+)
+
+k8s_worker_iam_policy = aws.iam.RolePolicy(
+    "k8s_worker_iam_policy",
+    role=k8s_worker_iam_role.id,
+    policy=json.dumps(
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "ec2:DescribeInstances",
+                        "ec2:DescribeRegions",
+                        "ecr:GetAuthorizationToken",
+                        "ecr:BatchCheckLayerAvailability",
+                        "ecr:GetDownloadUrlForLayer",
+                        "ecr:GetRepositoryPolicy",
+                        "ecr:DescribeRepositories",
+                        "ecr:ListImages",
+                        "ecr:BatchGetImage",
+                    ],
+                    "Resource": ["*"],
+                }
+            ],
+        }
+    ),
+)
+
 with Path.home().joinpath(".ssh", "authorized_keys").open() as fd:
     public_key = fd.readline().strip("\n")
 
@@ -175,12 +320,33 @@ k8s_key_pair = aws.ec2.KeyPair(
     },
 )
 
+k8s_master_instance_profile = aws.iam.InstanceProfile(
+    "k8s_master_instance_profile",
+    role=k8s_master_iam_role.name,
+    tags={
+        "Name": "k8s_master_instance_profile",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
+k8s_worker_instance_profile = aws.iam.InstanceProfile(
+    "k8s_worker_instance_profile",
+    role=k8s_worker_iam_role.name,
+    tags={
+        "Name": "k8s_worker_instance_profile",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
 k8s_master_0 = aws.ec2.Instance(
     "k8s_master_0",
     ami="ami-090717c950a5c34d3",  # Ubuntu Server 18.04 LTS
     instance_type="t3.medium",
     associate_public_ip_address=True,
     subnet_id=k8s_subnet_0.id,
+    iam_instance_profile=k8s_master_instance_profile.name,
     root_block_device=aws.ec2.InstanceRootBlockDeviceArgs(
         volume_type="gp2",
         volume_size=50,
@@ -206,6 +372,7 @@ for i in range(2):
             instance_type="t3.large",
             associate_public_ip_address=True,
             subnet_id=k8s_subnet_0.id,
+            iam_instance_profile=k8s_worker_instance_profile.name,
             root_block_device=aws.ec2.InstanceRootBlockDeviceArgs(
                 volume_type="gp2",
                 volume_size=30,
@@ -222,6 +389,7 @@ for i in range(2):
             },
         )
     )
+
 
 pulumi.export("k8s_master_0_public_ip", k8s_master_0.public_ip)
 pulumi.export("k8s_master_0_private_ip", k8s_master_0.private_ip)
