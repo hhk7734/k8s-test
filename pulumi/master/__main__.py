@@ -63,9 +63,28 @@ k8s_subnet_0 = aws.ec2.Subnet(
     },
 )
 
+k8s_subnet_1 = aws.ec2.Subnet(
+    "k8s_subnet_1",
+    vpc_id=k8s_vpc.id,
+    cidr_block="10.234.128.0/24",
+    availability_zone=availability_zones.names[1],
+    map_public_ip_on_launch=True,
+    tags={
+        "Name": "k8s_subnet_1",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
 k8s_route_table_association_0 = aws.ec2.RouteTableAssociation(
     "k8s_route_table_association_0",
     subnet_id=k8s_subnet_0.id,
+    route_table_id=k8s_route_table_0.id,
+)
+
+k8s_route_table_association_1 = aws.ec2.RouteTableAssociation(
+    "k8s_route_table_association_1",
+    subnet_id=k8s_subnet_1.id,
     route_table_id=k8s_route_table_0.id,
 )
 
@@ -98,18 +117,6 @@ k8s_master_security_group = aws.ec2.SecurityGroup(
         aws.ec2.SecurityGroupIngressArgs(
             from_port=22,
             to_port=22,
-            protocol="tcp",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=80,
-            to_port=80,
-            protocol="tcp",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=433,
-            to_port=433,
             protocol="tcp",
             cidr_blocks=["0.0.0.0/0"],
         ),
@@ -162,6 +169,44 @@ k8s_worker_security_group = aws.ec2.SecurityGroup(
     },
 )
 
+k8s_alb_security_group = aws.ec2.SecurityGroup(
+    "k8s_alb_security_group",
+    vpc_id=k8s_vpc.id,
+    ingress=[
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=22,
+            to_port=22,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=80,
+            to_port=80,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=433,
+            to_port=433,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+    ],
+    egress=[
+        aws.ec2.SecurityGroupEgressArgs(
+            from_port=0,
+            to_port=0,
+            protocol="-1",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+    ],
+    tags={
+        "Name": "k8s_alb_security_group",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
 k8s_master_iam_role = aws.iam.Role(
     "k8s_master_iam_role",
     assume_role_policy=json.dumps(
@@ -205,6 +250,56 @@ k8s_worker_iam_role = aws.iam.Role(
         "Owner": "hhk7734",
     },
 )
+
+k8s_application_load_balancer = aws.lb.LoadBalancer(
+    "k8sLoadBalancer",
+    load_balancer_type="application",
+    internal=False,
+    subnets=[
+        k8s_subnet_0.id,
+        k8s_subnet_1.id,
+    ],
+    security_groups=[
+        k8s_common_security_group.id,
+        k8s_alb_security_group.id,
+    ],
+    tags={
+        "Name": "k8s_application_load_balancer",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
+k8s_alb_http_target_group = aws.lb.TargetGroup(
+    "k8sAlbHttpTargetGroup",
+    port=80,
+    protocol="HTTP",
+    vpc_id=k8s_vpc.id,
+    tags={
+        "Name": "k8s_alb_http_target_group",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
+k8s_alb_http_listener = aws.lb.Listener(
+    "k8s_alb_http_listener",
+    load_balancer_arn=k8s_application_load_balancer.arn,
+    port=80,
+    protocol="HTTP",
+    default_actions=[
+        aws.lb.ListenerDefaultActionArgs(
+            type="forward",
+            target_group_arn=k8s_alb_http_target_group.arn,
+        ),
+    ],
+    tags={
+        "Name": "k8s_alb_http_listener",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
 
 k8s_master_iam_policy = aws.iam.RolePolicy(
     "k8s_master_iam_policy",
