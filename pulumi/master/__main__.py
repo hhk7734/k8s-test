@@ -274,9 +274,11 @@ k8s_master_0 = aws.ec2.Instance(
 
 k8s_worker = []
 for i in range(2):
+    _tags = {"Name": f"k8s-master-{i}"}
+    _tags.update(common_tags)
     k8s_worker.append(
         aws.ec2.Instance(
-            f"k8s-worker-{i}",
+            _tags["Name"],
             ami="ami-090717c950a5c34d3",  # Ubuntu Server 18.04 LTS
             instance_type="t3.large",
             associate_public_ip_address=True,
