@@ -122,6 +122,18 @@ k8s_master_security_group = aws.ec2.SecurityGroup(
             protocol="tcp",
             cidr_blocks=["0.0.0.0/0"],
         ),
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=80,
+            to_port=80,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=433,
+            to_port=433,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
     ],
     egress=[
         aws.ec2.SecurityGroupEgressArgs(
@@ -171,44 +183,6 @@ k8s_worker_security_group = aws.ec2.SecurityGroup(
     },
 )
 
-k8s_alb_security_group = aws.ec2.SecurityGroup(
-    "k8s_alb_security_group",
-    vpc_id=k8s_vpc.id,
-    ingress=[
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=22,
-            to_port=22,
-            protocol="tcp",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=80,
-            to_port=80,
-            protocol="tcp",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=433,
-            to_port=433,
-            protocol="tcp",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-    ],
-    egress=[
-        aws.ec2.SecurityGroupEgressArgs(
-            from_port=0,
-            to_port=0,
-            protocol="-1",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-    ],
-    tags={
-        "Name": "k8s_alb_security_group",
-        "Stack": stack,
-        "Owner": "hhk7734",
-    },
-)
-
 k8s_master_iam_role = aws.iam.Role(
     "k8s_master_iam_role",
     assume_role_policy=json.dumps(
@@ -253,50 +227,76 @@ k8s_worker_iam_role = aws.iam.Role(
     },
 )
 
-k8s_application_load_balancer = aws.lb.LoadBalancer(
-    "k8sLoadBalancer",
-    load_balancer_type="application",
+k8s_load_balancer = aws.lb.LoadBalancer(
+    "k8s-load-balancer",
+    load_balancer_type="network",
     internal=False,
     subnets=[
         k8s_subnet_0.id,
         k8s_subnet_1.id,
     ],
-    security_groups=[
-        k8s_common_security_group.id,
-        k8s_alb_security_group.id,
-    ],
     tags={
-        "Name": "k8s_application_load_balancer",
+        "Name": "k8s-load-balancer",
         "Stack": stack,
         "Owner": "hhk7734",
     },
 )
 
-k8s_alb_http_target_group = aws.lb.TargetGroup(
-    "k8sAlbHttpTargetGroup",
+k8s_lb_http_tg = aws.lb.TargetGroup(
+    "k8s-lb-http-tg",
     port=80,
-    protocol="HTTP",
+    protocol="TCP",
     vpc_id=k8s_vpc.id,
     tags={
-        "Name": "k8s_alb_http_target_group",
+        "Name": "k8s-lb-http-tg",
         "Stack": stack,
         "Owner": "hhk7734",
     },
 )
 
-k8s_alb_http_listener = aws.lb.Listener(
-    "k8s_alb_http_listener",
-    load_balancer_arn=k8s_application_load_balancer.arn,
+k8s_lb_http_listener = aws.lb.Listener(
+    "k8s-lb-http-listener",
+    load_balancer_arn=k8s_load_balancer.arn,
     port=80,
-    protocol="HTTP",
+    protocol="TCP",
     default_actions=[
         aws.lb.ListenerDefaultActionArgs(
             type="forward",
-            target_group_arn=k8s_alb_http_target_group.arn,
+            target_group_arn=k8s_lb_http_tg.arn,
         ),
     ],
     tags={
-        "Name": "k8s_alb_http_listener",
+        "Name": "k8s-lb-http-listener",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
+k8s_lb_https_tg = aws.lb.TargetGroup(
+    "k8s-lb-https-tg",
+    port=433,
+    protocol="TCP",
+    vpc_id=k8s_vpc.id,
+    tags={
+        "Name": "k8s-lb-https-tg",
+        "Stack": stack,
+        "Owner": "hhk7734",
+    },
+)
+
+k8s_lb_https_listener = aws.lb.Listener(
+    "k8s-lb-https-listener",
+    load_balancer_arn=k8s_load_balancer.arn,
+    port=433,
+    protocol="TCP",
+    default_actions=[
+        aws.lb.ListenerDefaultActionArgs(
+            type="forward",
+            target_group_arn=k8s_lb_https_tg.arn,
+        ),
+    ],
+    tags={
+        "Name": "k8s-lb-https-listener",
         "Stack": stack,
         "Owner": "hhk7734",
     },
