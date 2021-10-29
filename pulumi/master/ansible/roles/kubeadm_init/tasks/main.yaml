@@ -4,16 +4,31 @@
     content: |
       apiVersion: kubeadm.k8s.io/v1beta2
       kind: ClusterConfiguration
+      clusterName: {{ kubernetes_cluster_name }}
       kubernetesVersion: {{ kubernetes_version }}
       networking:
         dnsDomain: cluster.local
         podSubnet: {{ pod_network_cidr }} # pod network에 할당되는 IP 주소 범위
         serviceSubnet: 10.96.0.0/12 # 10.96.0.0 ~ 10.111.255.255
+      apiServer:
+        extraArgs:
+          cloud-provider: external
+      controllerManager:
+        extraArgs:
+          cloud-provider: external
       ---
-      apiVersion: kubelet.config.k8s.io/v1beta1
+      apiVersion: kubeadm.k8s.io/v1beta2
+      kind: InitConfiguration
+      nodeRegistration:
+        kubeletExtraArgs:
+          cloud-provider: external
+      ---
       kind: KubeletConfiguration
+      apiVersion: kubelet.config.k8s.io/v1beta1
       cgroupDriver: systemd
     mode: 0644
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
 
 - name: Initialize the cluster with kubeadm
   shell: |
@@ -27,6 +42,8 @@
     path: /home/{{ ansible_user }}/.kube
     state: directory
     mode: 0755
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
 
 - name: Copy admin.conf to {{ ansible_user }}'s kube config
   copy:
@@ -37,6 +54,22 @@
     owner: '{{ ansible_user }}'
     group: '{{ ansible_user }}'
 
+- name: Install helm
+  snap:
+    name: helm
+    state: present
+    classic: yes
+
+- name: Install aws-cloud-controller-manager
+  become: no
+  shell: |
+    helm repo add aws-cloud-controller-manager https://kubernetes.github.io/cloud-provider-aws \
+    && helm repo update \
+    && helm upgrade --install aws-cloud-controller-manager aws-cloud-controller-manager/aws-cloud-controller-manager > helm_install.txt
+  args:
+    chdir: /home/{{ ansible_user }}
+    creates: helm_install.txt
+
 - name: Get /home/{{ ansible_user }}/tigera-operator.yaml
   get_url:
     url: https://docs.projectcalico.org/manifests/tigera-operator.yaml
@@ -45,11 +78,8 @@
     owner: '{{ ansible_user }}'
     group: '{{ ansible_user }}'
 
-- name: k create -f tigera-operator.yaml
-  become: no
-  shell: kubectl create -f /home/{{ ansible_user }}/tigera-operator.yaml
-
 - name: Create '/home/{{ ansible_user }}/calico.yaml'
+  become: no
   copy:
     dest: '/home/{{ ansible_user }}/calico.yaml'
     content: |
@@ -75,6 +105,10 @@
         name: default
       spec: {}
     mode: 0644
+
+- name: k create -f tigera-operator.yaml
+  become: no
+  shell: kubectl create -f /home/{{ ansible_user }}/tigera-operator.yaml
 
 - name: k create -f calico.yaml
   become: no
