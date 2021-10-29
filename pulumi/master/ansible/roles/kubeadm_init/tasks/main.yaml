@@ -1,0 +1,81 @@
+- name: Create '/home/{{ ansible_user }}/kubeadm-master.yaml'
+  copy:
+    dest: '/home/{{ ansible_user }}/kubeadm-master.yaml'
+    content: |
+      apiVersion: kubeadm.k8s.io/v1beta2
+      kind: ClusterConfiguration
+      kubernetesVersion: {{ kubernetes_version }}
+      networking:
+        dnsDomain: cluster.local
+        podSubnet: {{ pod_network_cidr }} # pod network에 할당되는 IP 주소 범위
+        serviceSubnet: 10.96.0.0/12 # 10.96.0.0 ~ 10.111.255.255
+      ---
+      apiVersion: kubelet.config.k8s.io/v1beta1
+      kind: KubeletConfiguration
+      cgroupDriver: systemd
+    mode: 0644
+
+- name: Initialize the cluster with kubeadm
+  shell: |
+    kubeadm init --config /home/{{ ansible_user }}/kubeadm-master.yaml > kubeadm_init.txt
+  args:
+    chdir: /home/{{ ansible_user }}
+    creates: kubeadm_init.txt
+
+- name: Create /home/{{ ansible_user }}/.kube directory
+  file:
+    path: /home/{{ ansible_user }}/.kube
+    state: directory
+    mode: 0755
+
+- name: Copy admin.conf to {{ ansible_user }}'s kube config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/{{ ansible_user }}/.kube/config
+    remote_src: yes
+    mode: 0644
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
+
+- name: Get /home/{{ ansible_user }}/tigera-operator.yaml
+  get_url:
+    url: https://docs.projectcalico.org/manifests/tigera-operator.yaml
+    dest: /home/{{ ansible_user }}/tigera-operator.yaml
+    mode: 0644
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
+
+- name: k create -f tigera-operator.yaml
+  become: no
+  shell: kubectl create -f /home/{{ ansible_user }}/tigera-operator.yaml
+
+- name: Create '/home/{{ ansible_user }}/calico.yaml'
+  copy:
+    dest: '/home/{{ ansible_user }}/calico.yaml'
+    content: |
+      apiVersion: operator.tigera.io/v1
+      kind: Installation
+      metadata:
+        name: default
+      spec:
+        # Configures Calico networking.
+        calicoNetwork:
+          # Note: The ipPools section cannot be modified post-install.
+          ipPools:
+            - blockSize: 26
+              cidr: {{ pod_network_cidr }}
+              encapsulation: IPIP
+              natOutgoing: Enabled
+              nodeSelector: all()
+          bgp: Enabled
+      ---
+      apiVersion: operator.tigera.io/v1
+      kind: APIServer
+      metadata:
+        name: default
+      spec: {}
+    mode: 0644
+
+- name: k create -f calico.yaml
+  become: no
+  shell: kubectl create -f /home/{{ ansible_user }}/calico.yaml

@@ -17,9 +17,9 @@
       https://apt.kubernetes.io/ kubernetes-xenial main
     filename: kubernetes
 
-- name: Install kubeadm kubectl kubelet version={{ version }}
+- name: Install kubeadm kubectl kubelet version={{ kubernetes_apt_version }}
   apt:
-    name: '{{ item }}={{ version }}'
+    name: '{{ item }}={{ kubernetes_apt_version }}'
     update_cache: yes
     force: yes
   loop: ['kubelet', 'kubeadm', 'kubectl']

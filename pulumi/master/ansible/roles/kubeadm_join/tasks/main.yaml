@@ -1,0 +1,10 @@
+- name: Get join command
+  delegate_to: master_0
+  shell: kubeadm token create --ttl 10m --print-join-command
+  register: kubeadm_join_command
+
+- name: Join kubeadm
+  shell: '{{ kubeadm_join_command.stdout }} > kubeadm_join.txt'
+  args:
+    chdir: /home/{{ ansible_user }}
+    creates: kubeadm_join.txt
