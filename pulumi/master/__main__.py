@@ -83,71 +83,22 @@ k8s_common_security_group = aws.ec2.SecurityGroup(
     vpc_id=k8s_vpc.id,
     ingress=[
         aws.ec2.SecurityGroupIngressArgs(
-            from_port=0,
-            to_port=0,
-            protocol="all",
-            self=True,
-        ),
-    ],
-    egress=[
-        aws.ec2.SecurityGroupEgressArgs(
-            from_port=0,
-            to_port=0,
-            protocol="all",
-            self=True,
-        ),
-    ],
-    tags=_tags,
-)
-
-
-_tags = {"Name": "k8s-master-sg"}
-_tags.update(common_tags)
-k8s_master_security_group = aws.ec2.SecurityGroup(
-    _tags["Name"],
-    vpc_id=k8s_vpc.id,
-    ingress=[
-        aws.ec2.SecurityGroupIngressArgs(
             from_port=22,
             to_port=22,
             protocol="tcp",
             cidr_blocks=["0.0.0.0/0"],
         ),
+        #         aws.ec2.SecurityGroupIngressArgs(
+        #             from_port=30000,
+        #             to_port=32767,
+        #             protocol="tcp",
+        #             cidr_blocks=["0.0.0.0/0"],
+        #         ),
         aws.ec2.SecurityGroupIngressArgs(
-            from_port=30000,
-            to_port=32767,
-            protocol="tcp",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-    ],
-    egress=[
-        aws.ec2.SecurityGroupEgressArgs(
             from_port=0,
             to_port=0,
-            protocol="-1",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-    ],
-    tags=_tags,
-)
-
-_tags = {"Name": "k8s-worker-sg"}
-_tags.update(common_tags)
-k8s_worker_security_group = aws.ec2.SecurityGroup(
-    _tags["Name"],
-    vpc_id=k8s_vpc.id,
-    ingress=[
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=22,
-            to_port=22,
-            protocol="tcp",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=30000,
-            to_port=32767,
-            protocol="tcp",
-            cidr_blocks=["0.0.0.0/0"],
+            protocol="all",
+            self=True,
         ),
     ],
     egress=[
@@ -264,17 +215,19 @@ k8s_master_0 = aws.ec2.Instance(
         volume_type="gp2",
         volume_size=50,
     ),
-    vpc_security_group_ids=[
-        k8s_common_security_group.id,
-        k8s_master_security_group.id,
-    ],
+    # kubernetes.io/cluster/hhk-cluster
+    # Error syncing load balancer: failed to ensure load balancer:
+    #   Multiple tagged security groups found for instance i-03d3679bc8bdf3374;
+    #   ensure only the k8s security group is tagged;
+    #   the tagged groups were sg-xxx sg-yyy
+    vpc_security_group_ids=[k8s_common_security_group.id],
     key_name=k8s_key_pair.key_name,
     tags=_tags,
 )
 
 k8s_worker = []
 for i in range(2):
-    _tags = {"Name": f"k8s-master-{i}"}
+    _tags = {"Name": f"k8s-worker-{i}"}
     _tags.update(common_tags)
     k8s_worker.append(
         aws.ec2.Instance(
@@ -288,10 +241,8 @@ for i in range(2):
                 volume_type="gp2",
                 volume_size=30,
             ),
-            vpc_security_group_ids=[
-                k8s_common_security_group.id,
-                k8s_worker_security_group.id,
-            ],
+            # Ref: k8s-master-0
+            vpc_security_group_ids=[k8s_common_security_group.id],
             key_name=k8s_key_pair.key_name,
             tags=_tags,
         )
