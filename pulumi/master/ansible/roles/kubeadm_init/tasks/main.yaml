@@ -65,7 +65,8 @@
   shell: |
     helm repo add aws-cloud-controller-manager https://kubernetes.github.io/cloud-provider-aws \
     && helm repo update \
-    && helm upgrade --install aws-cloud-controller-manager aws-cloud-controller-manager/aws-cloud-controller-manager > helm_install.txt
+    && helm upgrade --install aws-cloud-controller-manager aws-cloud-controller-manager/aws-cloud-controller-manager \
+        --set "args={--v=2,--cloud-provider=aws,--configure-cloud-routes=false}" > helm_install.txt
   args:
     chdir: /home/{{ ansible_user }}
     creates: helm_install.txt
