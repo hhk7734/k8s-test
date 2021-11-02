@@ -225,11 +225,11 @@ k8s_master_0 = aws.ec2.Instance(
     tags=_tags,
 )
 
-k8s_worker = []
-for i in range(2):
+k8s_workers = []
+for i in range(1):
     _tags = {"Name": f"k8s-worker-{i}"}
     _tags.update(common_tags)
-    k8s_worker.append(
+    k8s_workers.append(
         aws.ec2.Instance(
             _tags["Name"],
             ami="ami-090717c950a5c34d3",  # Ubuntu Server 18.04 LTS
@@ -251,6 +251,6 @@ for i in range(2):
 
 pulumi.export("k8s-master-0-public-ip", k8s_master_0.public_ip)
 pulumi.export("k8s-master-0-private-dns", k8s_master_0.private_dns)
-for i in range(2):
-    pulumi.export(f"k8s-worker-{i}-public-ip", k8s_worker[i].public_ip)
-    pulumi.export(f"k8s-worker-{i}-private-dns", k8s_worker[i].private_dns)
+for i, worker in enumerate(k8s_workers):
+    pulumi.export(f"k8s-worker-{i}-public-ip", worker.public_ip)
+    pulumi.export(f"k8s-worker-{i}-private-dns", worker.private_dns)
