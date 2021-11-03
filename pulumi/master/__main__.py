@@ -67,7 +67,6 @@ k8s_subnet_0 = aws.ec2.Subnet(
     tags=_tags,
 )
 
-
 _tags = {"Name": "k8s-route-table-association-0"}
 _tags.update(common_tags)
 k8s_route_table_association_0 = aws.ec2.RouteTableAssociation(
@@ -76,9 +75,17 @@ k8s_route_table_association_0 = aws.ec2.RouteTableAssociation(
     route_table_id=k8s_route_table_0.id,
 )
 
+# 이 scurity group은 hhk-cluster load balancer를 위한 것이기 때문에 수정하면 안됨
 _tags = {"Name": "k8s-common-sg"}
 _tags.update(common_tags)
 k8s_common_security_group = aws.ec2.SecurityGroup(
+    _tags["Name"],
+    vpc_id=k8s_vpc.id,
+    tags=_tags,
+)
+
+_tags = {"Name": "k8s-public-ssh-sg"}
+k8s_public_ssh_sg = aws.ec2.SecurityGroup(
     _tags["Name"],
     vpc_id=k8s_vpc.id,
     ingress=[
@@ -88,28 +95,7 @@ k8s_common_security_group = aws.ec2.SecurityGroup(
             protocol="tcp",
             cidr_blocks=["0.0.0.0/0"],
         ),
-        #         aws.ec2.SecurityGroupIngressArgs(
-        #             from_port=30000,
-        #             to_port=32767,
-        #             protocol="tcp",
-        #             cidr_blocks=["0.0.0.0/0"],
-        #         ),
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=0,
-            to_port=0,
-            protocol="all",
-            self=True,
-        ),
     ],
-    egress=[
-        aws.ec2.SecurityGroupEgressArgs(
-            from_port=0,
-            to_port=0,
-            protocol="-1",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-    ],
-    tags=_tags,
 )
 
 _tags = {"Name": "k8s-master-iam-role"}
@@ -220,7 +206,10 @@ k8s_master_0 = aws.ec2.Instance(
     #   Multiple tagged security groups found for instance i-03d3679bc8bdf3374;
     #   ensure only the k8s security group is tagged;
     #   the tagged groups were sg-xxx sg-yyy
-    vpc_security_group_ids=[k8s_common_security_group.id],
+    vpc_security_group_ids=[
+        k8s_common_security_group.id,
+        k8s_public_ssh_sg.id,
+    ],
     key_name=k8s_key_pair.key_name,
     tags=_tags,
 )
@@ -242,7 +231,10 @@ for i in range(1):
                 volume_size=30,
             ),
             # Ref: k8s-master-0
-            vpc_security_group_ids=[k8s_common_security_group.id],
+            vpc_security_group_ids=[
+                k8s_common_security_group.id,
+                k8s_public_ssh_sg.id,
+            ],
             key_name=k8s_key_pair.key_name,
             tags=_tags,
         )
