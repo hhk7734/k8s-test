@@ -3,6 +3,8 @@ from pathlib import Path
 import pulumi
 import pulumi_aws as aws
 
+from .. import role
+
 BASE_DIR = Path(__file__).parent.resolve()
 
 stack = pulumi.get_stack()
@@ -23,6 +25,7 @@ master_node = aws.iam.Policy(
         "master-node.json",
     ).read_text(encoding="utf-8"),
     tags=_tags,
+    opts=pulumi.ResourceOptions(parent=role.master_node),
 )
 
 _tags = {"Name": f"{cluster}-worker-node-policy"}
@@ -33,6 +36,7 @@ worker_node = aws.iam.Policy(
         "worker-node.json",
     ).read_text(encoding="utf-8"),
     tags=_tags,
+    opts=pulumi.ResourceOptions(parent=role.worker_node),
 )
 
 _tags = {"Name": f"{cluster}-autoscaler-policy"}
