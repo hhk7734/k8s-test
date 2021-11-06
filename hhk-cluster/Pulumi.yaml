@@ -1,6 +1,6 @@
-name: master
+name: kubernetes
 runtime:
   name: python
   options:
     virtualenv: venv
-description: k8s-master
+description: kubernetes

@@ -1,5 +1,5 @@
-encryptionsalt: v1:of0Mc0yOQ80=:v1:CceizEwb0P+i5VXP:l0AsIZl3igqeHRSMfNnLye/JJmGWEg==
+encryptionsalt: v1:dgKqM2CLb2U=:v1:ANCyuA60cCoeVqb4:y5NIUYSnR71KkcEymsWvSjQ11ytCiw==
 config:
   aws:region: us-west-2
-  master:manager: hhk7734
-  master:cluster-name: hhk-cluster
+  kubernetes:manager: hhk7734
+  kubernetes:cluster-name: kubernetes
