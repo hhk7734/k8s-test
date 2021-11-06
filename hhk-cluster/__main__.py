@@ -5,101 +5,21 @@ import pulumi
 import pulumi_aws as aws
 
 import iam
+import network
 
 stack = pulumi.get_stack()
 
 BASE_DIR = Path(__file__).parent.resolve()
 
+stack = pulumi.get_stack()
+config = pulumi.Config()
+
+cluster = config.require("cluster-name")
 common_tags = {
     "Stack": stack,
-    "kubernetes.io/cluster/hhk-cluster": "owned",  # or "shared"
-    "Owner": "hhk7734",
+    f"kubernetes.io/cluster/{cluster}": "owned",  # or "shared"
+    "Manager": config.require("manager"),
 }
-
-# 10.234.0.0/16
-# 10.234.0.0 네트워크 주소
-# 10.234.0.1 VPC 라우터 주소
-# 10.234.0.2 DNS 서버 주소
-# 10.234.0.3 Reserved
-# 10.234.255.255 Reserved
-_tags = {"Name": "k8s-vpc"}
-_tags.update(common_tags)
-k8s_vpc = aws.ec2.Vpc(
-    _tags["Name"],
-    cidr_block="10.234.0.0/16",
-    tags=_tags,
-)
-
-_tags = {"Name": "k8s-igw"}
-_tags.update(common_tags)
-k8s_internet_gateway = aws.ec2.InternetGateway(
-    _tags["Name"],
-    vpc_id=k8s_vpc.id,
-    tags=_tags,
-)
-
-
-_tags = {"Name": "k8s-route-table-0"}
-_tags.update(common_tags)
-k8s_route_table_0 = aws.ec2.RouteTable(
-    _tags["Name"],
-    vpc_id=k8s_vpc.id,
-    routes=[
-        aws.ec2.RouteTableRouteArgs(
-            cidr_block="0.0.0.0/0",
-            gateway_id=k8s_internet_gateway.id,
-        ),  # Public
-    ],
-    tags=_tags,
-)
-
-availability_zones = aws.get_availability_zones(state="available")
-
-_tags = {
-    "Name": "k8s-subnet-0",
-    "kubernetes.io/role/elb": "1",
-}
-_tags.update(common_tags)
-k8s_subnet_0 = aws.ec2.Subnet(
-    _tags["Name"],
-    vpc_id=k8s_vpc.id,
-    cidr_block="10.234.1.0/24",
-    availability_zone=availability_zones.names[0],
-    map_public_ip_on_launch=True,
-    tags=_tags,
-)
-
-_tags = {"Name": "k8s-route-table-association-0"}
-_tags.update(common_tags)
-k8s_route_table_association_0 = aws.ec2.RouteTableAssociation(
-    _tags["Name"],
-    subnet_id=k8s_subnet_0.id,
-    route_table_id=k8s_route_table_0.id,
-)
-
-# 이 scurity group은 hhk-cluster load balancer를 위한 것이기 때문에 수정하면 안됨
-_tags = {"Name": "k8s-common-sg"}
-_tags.update(common_tags)
-k8s_common_security_group = aws.ec2.SecurityGroup(
-    _tags["Name"],
-    vpc_id=k8s_vpc.id,
-    tags=_tags,
-    opts=pulumi.ResourceOptions(ignore_changes=["ingress", "egress"]),
-)
-
-_tags = {"Name": "k8s-public-ssh-sg"}
-k8s_public_ssh_sg = aws.ec2.SecurityGroup(
-    _tags["Name"],
-    vpc_id=k8s_vpc.id,
-    ingress=[
-        aws.ec2.SecurityGroupIngressArgs(
-            from_port=22,
-            to_port=22,
-            protocol="tcp",
-            cidr_blocks=["0.0.0.0/0"],
-        ),
-    ],
-)
 
 _tags = {"Name": "k8s-master-iam-role"}
 _tags.update(common_tags)
@@ -176,7 +96,7 @@ k8s_master_0 = aws.ec2.Instance(
     ami="ami-090717c950a5c34d3",  # Ubuntu Server 18.04 LTS
     instance_type="t3.medium",
     associate_public_ip_address=True,
-    subnet_id=k8s_subnet_0.id,
+    subnet_id=network.subnet[0].id,
     iam_instance_profile=k8s_master_instance_profile.name,
     root_block_device=aws.ec2.InstanceRootBlockDeviceArgs(
         volume_type="gp2",
@@ -188,8 +108,8 @@ k8s_master_0 = aws.ec2.Instance(
     #   ensure only the k8s security group is tagged;
     #   the tagged groups were sg-xxx sg-yyy
     vpc_security_group_ids=[
-        k8s_common_security_group.id,
-        k8s_public_ssh_sg.id,
+        network.common_sg.id,
+        network.elb_sg.id,
     ],
     key_name=k8s_key_pair.key_name,
     tags=_tags,
@@ -205,7 +125,7 @@ for i in range(1):
             ami="ami-090717c950a5c34d3",  # Ubuntu Server 18.04 LTS
             instance_type="t3.large",
             associate_public_ip_address=True,
-            subnet_id=k8s_subnet_0.id,
+            subnet_id=network.subnet[0].id,
             iam_instance_profile=k8s_worker_instance_profile.name,
             root_block_device=aws.ec2.InstanceRootBlockDeviceArgs(
                 volume_type="gp2",
@@ -213,8 +133,8 @@ for i in range(1):
             ),
             # Ref: k8s-master-0
             vpc_security_group_ids=[
-                k8s_common_security_group.id,
-                k8s_public_ssh_sg.id,
+                network.common_sg.id,
+                network.elb_sg.id,
             ],
             key_name=k8s_key_pair.key_name,
             tags=_tags,
