@@ -8,13 +8,14 @@ BASE_DIR = Path(__file__).parent.resolve()
 stack = pulumi.get_stack()
 config = pulumi.Config()
 
+cluster = config.require("cluster-name")
 common_tags = {
     "Stack": stack,
-    f"kubernetes.io/cluster/{config.require('cluster-name')}": "owned",  # or "shared"
+    f"kubernetes.io/cluster/{cluster}": "owned",  # or "shared"
     "Manager": config.require("manager"),
 }
 
-_tags = {"Name": "master-node-policy"}
+_tags = {"Name": f"{cluster}-master-node-policy"}
 _tags.update(common_tags)
 master_node = aws.iam.Policy(
     _tags["Name"],
@@ -24,7 +25,7 @@ master_node = aws.iam.Policy(
     tags=_tags,
 )
 
-_tags = {"Name": "worker-node-policy"}
+_tags = {"Name": f"{cluster}-worker-node-policy"}
 _tags.update(common_tags)
 worker_node = aws.iam.Policy(
     _tags["Name"],
@@ -34,7 +35,7 @@ worker_node = aws.iam.Policy(
     tags=_tags,
 )
 
-_tags = {"Name": "cluster-autoscaler-policy"}
+_tags = {"Name": f"{cluster}-autoscaler-policy"}
 _tags.update(common_tags)
 cluster_autoscaler = aws.iam.Policy(
     _tags["Name"],
