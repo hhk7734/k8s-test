@@ -4,6 +4,8 @@ from pathlib import Path
 import pulumi
 import pulumi_aws as aws
 
+import iam
+
 stack = pulumi.get_stack()
 
 BASE_DIR = Path(__file__).parent.resolve()
@@ -82,6 +84,7 @@ k8s_common_security_group = aws.ec2.SecurityGroup(
     _tags["Name"],
     vpc_id=k8s_vpc.id,
     tags=_tags,
+    opts=pulumi.ResourceOptions(ignore_changes=["ingress", "egress"]),
 )
 
 _tags = {"Name": "k8s-public-ssh-sg"}
