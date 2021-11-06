@@ -1,11 +1,10 @@
-import json
 from pathlib import Path
 
 import pulumi
 import pulumi_aws as aws
 
-import iam
 import network
+from iam import policy, role
 
 stack = pulumi.get_stack()
 
@@ -20,46 +19,6 @@ common_tags = {
     f"kubernetes.io/cluster/{cluster}": "owned",  # or "shared"
     "Manager": config.require("manager"),
 }
-
-_tags = {"Name": "k8s-master-iam-role"}
-_tags.update(common_tags)
-k8s_master_iam_role = aws.iam.Role(
-    _tags["Name"],
-    assume_role_policy=json.dumps(
-        {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Action": "sts:AssumeRole",
-                    "Principal": {"Service": "ec2.amazonaws.com"},
-                    "Effect": "Allow",
-                    "Sid": "",
-                }
-            ],
-        }
-    ),
-    tags=_tags,
-)
-
-_tags = {"Name": "k8s-worker-iam-role"}
-_tags.update(common_tags)
-k8s_worker_iam_role = aws.iam.Role(
-    _tags["Name"],
-    assume_role_policy=json.dumps(
-        {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Action": "sts:AssumeRole",
-                    "Principal": {"Service": "ec2.amazonaws.com"},
-                    "Effect": "Allow",
-                    "Sid": "",
-                }
-            ],
-        }
-    ),
-    tags=_tags,
-)
 
 with Path.home().joinpath(".ssh", "authorized_keys").open() as fd:
     public_key = fd.readline().strip("\n")
@@ -77,7 +36,7 @@ _tags = {"Name": "k8s-master-instance-profile"}
 _tags.update(common_tags)
 k8s_master_instance_profile = aws.iam.InstanceProfile(
     _tags["Name"],
-    role=k8s_master_iam_role.name,
+    role=role.master_node.name,
     tags=_tags,
 )
 
@@ -85,7 +44,7 @@ _tags = {"Name": "k8s-worker-instance-profile"}
 _tags.update(common_tags)
 k8s_worker_instance_profile = aws.iam.InstanceProfile(
     _tags["Name"],
-    role=k8s_worker_iam_role.name,
+    role=role.worker_node.name,
     tags=_tags,
 )
 
