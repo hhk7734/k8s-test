@@ -70,6 +70,30 @@
     },
     {
       "Action": [
+        "ec2:CreateVolume"
+      ],
+      "Condition": {
+        "StringLike": {
+          "aws:RequestTag/kubernetes.io/cluster/*": "owned"
+        }
+      },
+      "Effect": "Allow",
+      "Resource": "*"
+    },
+    {
+      "Action": [
+        "ec2:DeleteVolume"
+      ],
+      "Condition": {
+        "StringLike": {
+          "ec2:ResourceTag/ebs.csi.aws.com/cluster": "true"
+        }
+      },
+      "Effect": "Allow",
+      "Resource": "*"
+    },
+    {
+      "Action": [
         "ec2:DeleteVolume"
       ],
       "Condition": {
@@ -86,7 +110,7 @@
       ],
       "Condition": {
         "StringLike": {
-          "ec2:ResourceTag/ebs.csi.aws.com/cluster": "true"
+          "ec2:ResourceTag/kubernetes.io/cluster/*": "owned"
         }
       },
       "Effect": "Allow",
