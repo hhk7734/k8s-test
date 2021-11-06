@@ -102,8 +102,13 @@ elb_sg = aws.ec2.SecurityGroup(
     opts=pulumi.ResourceOptions(ignore_changes=["ingress"], parent=vpc),
 )
 
+sg_common_tags = {
+    "Stack": stack,
+    "Manager": config.require("manager"),
+}
+
 _tags = {"Name": f"{cluster}-common-sg"}
-_tags.update(common_tags)
+_tags.update(sg_common_tags)
 common_sg = aws.ec2.SecurityGroup(
     _tags["Name"],
     vpc_id=vpc.id,
@@ -120,6 +125,29 @@ common_sg = aws.ec2.SecurityGroup(
             from_port=0,
             to_port=0,
             protocol="all",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+    ],
+    tags=_tags,
+    opts=pulumi.ResourceOptions(parent=vpc),
+)
+
+_tags = {"Name": f"{cluster}-ssh-sg"}
+_tags.update(sg_common_tags)
+ssh_sg = aws.ec2.SecurityGroup(
+    _tags["Name"],
+    vpc_id=vpc.id,
+    ingress=[
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=22,
+            to_port=22,
+            protocol="tcp",
+            cidr_blocks=["0.0.0.0/0"],
+        ),
+        aws.ec2.SecurityGroupIngressArgs(
+            from_port=6443,
+            to_port=6443,
+            protocol="tcp",
             cidr_blocks=["0.0.0.0/0"],
         ),
     ],

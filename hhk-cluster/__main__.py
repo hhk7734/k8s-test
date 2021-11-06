@@ -49,7 +49,7 @@ for i in range(1):
             volume_type="gp2",
             volume_size=50,
         ),
-        # kubernetes.io/cluster/hhk-cluster
+        # kubernetes.io/cluster/kubernetes
         # Error syncing load balancer: failed to ensure load balancer:
         #   Multiple tagged security groups found for instance i-03d3679bc8bdf3374;
         #   ensure only the k8s security group is tagged;
@@ -57,6 +57,7 @@ for i in range(1):
         vpc_security_group_ids=[
             network.common_sg.id,
             network.elb_sg.id,
+            network.ssh_sg.id,
         ],
         key_name=k8s_key_pair.key_name,
         tags=_tags,
@@ -65,7 +66,7 @@ for i in range(1):
 
 workers = {}
 
-for i in range(1):
+for i in range(2):
     _tags = {"Name": f"{cluster}-worker-node-{i}"}
     _tags.update(common_tags)
     workers[i] = aws.ec2.Instance(
@@ -83,6 +84,7 @@ for i in range(1):
         vpc_security_group_ids=[
             network.common_sg.id,
             network.elb_sg.id,
+            network.ssh_sg.id,
         ],
         key_name=k8s_key_pair.key_name,
         tags=_tags,
