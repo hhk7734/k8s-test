@@ -32,10 +32,10 @@
 
 - name: Initialize the cluster with kubeadm
   shell: |
-    kubeadm init --config /home/{{ ansible_user }}/kubeadm-master.yaml > kubeadm_init.txt
+    kubeadm init --config /home/{{ ansible_user }}/kubeadm-master.yaml > kubeadm-init.txt
   args:
     chdir: /home/{{ ansible_user }}
-    creates: kubeadm_init.txt
+    creates: kubeadm-init.txt
 
 - name: Create /home/{{ ansible_user }}/.kube directory
   file:
@@ -68,11 +68,10 @@
     && helm upgrade --install aws-cloud-controller-manager aws-cloud-controller-manager/aws-cloud-controller-manager \
         --set "args[0]=--v=2" \
         --set "args[1]=--cloud-provider=aws" \
-        --set "args[2]=--use-service-account-credentials=false" \
-        --set "args[3]=--configure-cloud-routes=false" > helm_install.txt
+        --set "args[2]=--configure-cloud-routes=false" > aws-cloud-controller-install.txt
   args:
     chdir: /home/{{ ansible_user }}
-    creates: helm_install.txt
+    creates: aws-cloud-controller-install.txt
 
 - name: Get /home/{{ ansible_user }}/tigera-operator.yaml
   get_url:
