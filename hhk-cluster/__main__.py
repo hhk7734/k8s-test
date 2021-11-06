@@ -141,28 +141,6 @@ k8s_worker_iam_role = aws.iam.Role(
     tags=_tags,
 )
 
-with BASE_DIR.joinpath("iam", "policy", "master.json").open() as fd:
-    master_policy = fd.read()
-
-_tags = {"Name": "k8s-master-iam-policy"}
-_tags.update(common_tags)
-k8s_master_iam_policy = aws.iam.RolePolicy(
-    _tags["Name"],
-    role=k8s_master_iam_role.id,
-    policy=master_policy,
-)
-
-with BASE_DIR.joinpath("iam", "policy", "worker.json").open() as fd:
-    worker_policy = fd.read()
-
-_tags = {"Name": "k8s-worker-iam-policy"}
-_tags.update(common_tags)
-k8s_worker_iam_policy = aws.iam.RolePolicy(
-    _tags["Name"],
-    role=k8s_worker_iam_role.id,
-    policy=worker_policy,
-)
-
 with Path.home().joinpath(".ssh", "authorized_keys").open() as fd:
     public_key = fd.readline().strip("\n")
 
