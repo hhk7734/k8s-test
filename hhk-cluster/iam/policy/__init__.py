@@ -48,3 +48,13 @@ cluster_autoscaler = aws.iam.Policy(
     ).read_text(encoding="utf-8"),
     tags=_tags,
 )
+
+_tags = {"Name": f"{cluster}-ebs-csi-driver-policy"}
+_tags.update(common_tags)
+cluster_autoscaler = aws.iam.Policy(
+    _tags["Name"],
+    policy=BASE_DIR.joinpath(
+        "ebs-csi-driver.json",
+    ).read_text(encoding="utf-8"),
+    tags=_tags,
+)
