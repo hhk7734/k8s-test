@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - cert-manager.yaml
+
+# Patch upstream manifests to explicitly disable 'preserveUnknownFields',
+# otherwise upgrade with 'kubectl apply' fails.
+patches:
+  - path: patches/crd-preserve-unknown-fields.yaml
+    target:
+      kind: CustomResourceDefinition
