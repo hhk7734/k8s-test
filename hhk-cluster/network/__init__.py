@@ -81,6 +81,35 @@ subnet[0] = aws.ec2.Subnet(
     opts=pulumi.ResourceOptions(parent=vpc),
 )
 
+_tags = {
+    "Name": f"{cluster}-subnet-1",
+    "kubernetes.io/role/elb": "1",
+}
+_tags.update(common_tags)
+subnet[1] = aws.ec2.Subnet(
+    _tags["Name"],
+    vpc_id=vpc.id,
+    cidr_block="10.234.2.0/24",
+    availability_zone=AZs.names[1],
+    map_public_ip_on_launch=True,
+    tags=_tags,
+    opts=pulumi.ResourceOptions(parent=vpc),
+)
+
+rds_subnet = {}
+
+_tags = {
+    "Name": f"{cluster}-rds-subnet-0",
+    "kubernetes.io/role/elb": "1",
+}
+_tags.update(common_tags)
+rds_subnet[0] = aws.rds.SubnetGroup(
+    _tags["Name"],
+    subnet_ids=[subnet[0].id, subnet[1].id],
+    tags=_tags,
+    opts=pulumi.ResourceOptions(parent=vpc),
+)
+
 rtb_assoc = {}
 
 _tags = {"Name": f"{cluster}-rtb-assoc-0"}
