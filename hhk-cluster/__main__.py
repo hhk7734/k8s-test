@@ -96,3 +96,35 @@ for i, master in masters.items():
 for i, worker in workers.items():
     pulumi.export(f"{cluster}-worker-{i}-public-ip", worker.public_ip)
     pulumi.export(f"{cluster}-worker-{i}-private-dns", worker.private_dns)
+
+# rds = {}
+
+# _tags = {"Name": f"{cluster}-rds-0"}
+# _tags.update(common_tags)
+# rds[0] = aws.rds.Instance(
+#     _tags["Name"],
+#     engine="mysql",
+#     engine_version="8.0.23",
+#     identifier=_tags["Name"],
+#     username="kubeflow",
+#     password="kubeflow",
+#     instance_class="db.m6g.large",
+#     storage_type="gp2",
+#     allocated_storage=20,
+#     multi_az=False,
+#     db_subnet_group_name=network.rds_subnet[0].name,
+#     publicly_accessible=False,
+#     vpc_security_group_ids=[network.common_sg.id],
+#     tags=_tags,
+# )
+
+# s3 = {}
+
+# _tags = {"Name": f"{cluster}-s3-0"}
+# _tags.update(common_tags)
+# s3[0] = aws.s3.Bucket(
+#     _tags["Name"],
+#     bucket="hitsai-kubeflow",
+#     acl="private",
+#     tags=_tags,
+# )
