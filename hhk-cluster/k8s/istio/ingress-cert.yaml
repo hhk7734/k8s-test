@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: ingress-cert
+  namespace: istio-system
+spec:
+  secretName: ingress-cert
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  dnsNames:
+    -  # "*.sub.domain"
+    -  # "sub.domain"
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
