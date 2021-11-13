@@ -3,10 +3,6 @@ kind: Kustomization
 resources:
   - metrics-server.yaml
 
-namespace: kube-system
-
-# Patch upstream manifests to explicitly disable 'preserveUnknownFields',
-# otherwise upgrade with 'kubectl apply' fails.
 patches:
   - path: patches/metrics-server-args.yaml
     target:
