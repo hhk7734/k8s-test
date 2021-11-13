@@ -1,0 +1,26 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: hhk-eks
+  region: us-west-2
+
+iam:
+  withOIDC: true
+
+vpc:
+  cidr: 10.234.0.0/16
+
+managedNodeGroups:
+  - name: worker-m5-large-ng
+    instanceType: m5.large
+    minSize: 1
+    maxSize: 10
+    desiredCapacity: 1
+    volumeSize: 30
+    labels:
+      role: worker
+    tags:
+      nodegroup-role: worker
+    ssh:
+      publicKeyName: hhk-eks
