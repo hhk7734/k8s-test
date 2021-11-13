@@ -47,7 +47,7 @@ for i in range(1):
         iam_instance_profile=iam.master_node_profile.name,
         root_block_device=aws.ec2.InstanceRootBlockDeviceArgs(
             volume_type="gp2",
-            volume_size=50,
+            volume_size=20,
         ),
         # kubernetes.io/cluster/kubernetes
         # Error syncing load balancer: failed to ensure load balancer:
@@ -63,6 +63,8 @@ for i in range(1):
         tags=_tags,
     )
 
+
+# TODO: ASG
 
 workers = {}
 
