@@ -1,0 +1,6 @@
+- op: replace
+  path: /spec/template/metadata/annotations
+  value:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8085"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"

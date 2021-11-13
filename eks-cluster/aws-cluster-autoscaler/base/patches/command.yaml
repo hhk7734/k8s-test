@@ -1,0 +1,12 @@
+- op: replace
+  path: /spec/template/spec/containers/0/command
+  value:
+    - ./cluster-autoscaler
+    - --v=4
+    - --stderrthreshold=info
+    - --cloud-provider=aws
+    - --skip-nodes-with-local-storage=false
+    - --expander=least-waste
+    - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/hhk-eks
+    - --balance-similar-node-groups
+    - --skip-nodes-with-system-pods=false
