@@ -346,7 +346,7 @@ metadata:
     app.kubernetes.io/version: "8.2.3"
     app.kubernetes.io/managed-by: Helm
   name: prometheus-operator-grafana
-  namespace: default
+  namespace: monitoring
 ---
 # Source: kube-prometheus-stack/charts/grafana/templates/tests/test-serviceaccount.yaml
 apiVersion: v1
@@ -359,7 +359,7 @@ metadata:
     app.kubernetes.io/version: "8.2.3"
     app.kubernetes.io/managed-by: Helm
   name: prometheus-operator-grafana-test
-  namespace: default
+  namespace: monitoring
 ---
 # Source: kube-prometheus-stack/charts/kube-state-metrics/templates/serviceaccount.yaml
 apiVersion: v1
@@ -453,7 +453,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: prometheus-operator-grafana
-  namespace: default
+  namespace: monitoring
   labels:
     helm.sh/chart: grafana-6.17.5
     app.kubernetes.io/name: grafana
@@ -496,7 +496,7 @@ metadata:
     app.kubernetes.io/version: "8.2.3"
     app.kubernetes.io/managed-by: Helm
   name: prometheus-operator-grafana-config-dashboards
-  namespace: default
+  namespace: monitoring
 data:
   provider.yaml: |-
     apiVersion: 1
@@ -517,7 +517,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-operator-grafana
-  namespace: default
+  namespace: monitoring
   labels:
     helm.sh/chart: grafana-6.17.5
     app.kubernetes.io/name: grafana
@@ -543,7 +543,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-operator-grafana-test
-  namespace: default
+  namespace: monitoring
   labels:
     helm.sh/chart: grafana-6.17.5
     app.kubernetes.io/name: grafana
@@ -564,7 +564,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-operator-grafana-datasource
-  namespace: default
+  namespace: monitoring
   labels:
     grafana_datasource: "1"
     app: kube-prometheus-stack-grafana
@@ -592,7 +592,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-alertmanager-overview
   annotations:
     {}
@@ -1201,7 +1201,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-apiserver
   annotations:
     {}
@@ -2947,7 +2947,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-cluster-total
   annotations:
     {}
@@ -4828,7 +4828,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-k8s-coredns
   annotations:
     {}
@@ -6362,7 +6362,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-k8s-resources-cluster
   annotations:
     {}
@@ -9385,7 +9385,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-k8s-resources-namespace
   annotations:
     {}
@@ -12128,7 +12128,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-k8s-resources-node
   annotations:
     {}
@@ -13105,7 +13105,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-k8s-resources-pod
   annotations:
     {}
@@ -15531,7 +15531,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-k8s-resources-workload
   annotations:
     {}
@@ -17516,7 +17516,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-k8s-resources-workloads-namespace
   annotations:
     {}
@@ -19666,7 +19666,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-kubelet
   annotations:
     {}
@@ -21919,7 +21919,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-namespace-by-pod
   annotations:
     {}
@@ -23382,7 +23382,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-namespace-by-workload
   annotations:
     {}
@@ -25117,7 +25117,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-node-cluster-rsrc-use
   annotations:
     {}
@@ -26179,7 +26179,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-node-rsrc-use
   annotations:
     {}
@@ -27267,7 +27267,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-nodes
   annotations:
     {}
@@ -28257,7 +28257,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-persistentvolumesusage
   annotations:
     {}
@@ -28833,7 +28833,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-pod-total
   annotations:
     {}
@@ -30060,7 +30060,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-prometheus
   annotations:
     {}
@@ -31294,7 +31294,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-proxy
   annotations:
     {}
@@ -32550,7 +32550,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-statefulset
   annotations:
     {}
@@ -33477,7 +33477,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: default
+  namespace: monitoring
   name: prometheus-operator-workload-total
   annotations:
     {}
@@ -35287,7 +35287,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: prometheus-operator-grafana
-    namespace: default
+    namespace: monitoring
 roleRef:
   kind: ClusterRole
   name: prometheus-operator-grafana-clusterrole
@@ -35452,7 +35452,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: prometheus-operator-grafana
-  namespace: default
+  namespace: monitoring
   labels:
     helm.sh/chart: grafana-6.17.5
     app.kubernetes.io/name: grafana
@@ -35470,7 +35470,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: prometheus-operator-grafana-test
-  namespace: default
+  namespace: monitoring
   labels:
     helm.sh/chart: grafana-6.17.5
     app.kubernetes.io/name: grafana
@@ -35511,7 +35511,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: prometheus-operator-grafana
-  namespace: default
+  namespace: monitoring
   labels:
     helm.sh/chart: grafana-6.17.5
     app.kubernetes.io/name: grafana
@@ -35525,14 +35525,14 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prometheus-operator-grafana
-  namespace: default
+  namespace: monitoring
 ---
 # Source: kube-prometheus-stack/charts/grafana/templates/tests/test-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: prometheus-operator-grafana-test
-  namespace: default
+  namespace: monitoring
   labels:
     helm.sh/chart: grafana-6.17.5
     app.kubernetes.io/name: grafana
@@ -35546,7 +35546,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prometheus-operator-grafana-test
-  namespace: default
+  namespace: monitoring
 ---
 # Source: kube-prometheus-stack/templates/alertmanager/psp-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -35578,7 +35578,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus-operator-grafana
-  namespace: default
+  namespace: monitoring
   labels:
     helm.sh/chart: grafana-6.17.5
     app.kubernetes.io/name: grafana
@@ -35882,7 +35882,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus-operator-grafana
-  namespace: default
+  namespace: monitoring
   labels:
     helm.sh/chart: grafana-6.17.5
     app.kubernetes.io/name: grafana
@@ -35904,10 +35904,10 @@ spec:
         app.kubernetes.io/name: grafana
         app.kubernetes.io/instance: prometheus-operator
       annotations:
-        checksum/config: 4b9ddccf2a5ddbb0b585166cfb1e2201e5d1caf069ef187e1b0767b0161f75a2
+        checksum/config: 3c1a23dce7ead7ed1c7acd9934a548d22bb8fbd441b31c377c7f6b4a94f48381
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-        checksum/sc-dashboard-provider-config: 6fc31a77c5dcca7d73f5b2b942dfd80dc8621d96a402a83a579a3db9a9e3acae
-        checksum/secret: 1106bbb4774dfae31c7a81e1a3032d9d65fb04e126b655472792fb438dd78963
+        checksum/sc-dashboard-provider-config: 223950ca1efb8e59cf2d1b486c4800a3af07963c01d8c40f550d0433111559ab
+        checksum/secret: 09ab5b547e498a8363419bf3630a1985edd3e3a3bc961e70b57834d887eb2131
     spec:
       
       serviceAccountName: prometheus-operator-grafana
@@ -36283,7 +36283,7 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: 20Gi
+            storage: 30Gi
         storageClassName: gp2
   portName: web
 ---
@@ -36541,9 +36541,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: grafana
       app.kubernetes.io/instance: "prometheus-operator"
-  namespaceSelector:
-    matchNames:
-      - "default"
   endpoints:
   - port: service
     path: "/metrics"
@@ -36639,323 +36636,4 @@ webhooks:
         path: /admission-prometheusrules/validate
     admissionReviewVersions: ["v1", "v1beta1"]
     sideEffects: None
----
-# Source: kube-prometheus-stack/templates/prometheus-operator/admission-webhooks/job-patch/psp.yaml
-apiVersion: policy/v1beta1
-kind: PodSecurityPolicy
-metadata:
-  name: prometheus-operator-admission
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: kube-prometheus-stack-admission
-    
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: prometheus-operator
-    app.kubernetes.io/version: "20.0.1"
-    app.kubernetes.io/part-of: kube-prometheus-stack
-    chart: kube-prometheus-stack-20.0.1
-    release: "prometheus-operator"
-    heritage: "Helm"
-spec:
-  privileged: false
-  # Required to prevent escalations to root.
-  # allowPrivilegeEscalation: false
-  # This is redundant with non-root + disallow privilege escalation,
-  # but we can provide it for defense in depth.
-  #requiredDropCapabilities:
-  #  - ALL
-  # Allow core volume types.
-  volumes:
-    - 'configMap'
-    - 'emptyDir'
-    - 'projected'
-    - 'secret'
-    - 'downwardAPI'
-    - 'persistentVolumeClaim'
-  hostNetwork: false
-  hostIPC: false
-  hostPID: false
-  runAsUser:
-    # Permits the container to run with root privileges as well.
-    rule: 'RunAsAny'
-  seLinux:
-    # This policy assumes the nodes are using AppArmor rather than SELinux.
-    rule: 'RunAsAny'
-  supplementalGroups:
-    rule: 'MustRunAs'
-    ranges:
-      # Forbid adding the root group.
-      - min: 0
-        max: 65535
-  fsGroup:
-    rule: 'MustRunAs'
-    ranges:
-      # Forbid adding the root group.
-      - min: 0
-        max: 65535
-  readOnlyRootFilesystem: false
----
-# Source: kube-prometheus-stack/templates/prometheus-operator/admission-webhooks/job-patch/serviceaccount.yaml
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name:  prometheus-operator-admission
-  namespace: monitoring
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: kube-prometheus-stack-admission    
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: prometheus-operator
-    app.kubernetes.io/version: "20.0.1"
-    app.kubernetes.io/part-of: kube-prometheus-stack
-    chart: kube-prometheus-stack-20.0.1
-    release: "prometheus-operator"
-    heritage: "Helm"
----
-# Source: kube-prometheus-stack/templates/prometheus-operator/admission-webhooks/job-patch/clusterrole.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name:  prometheus-operator-admission
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: kube-prometheus-stack-admission    
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: prometheus-operator
-    app.kubernetes.io/version: "20.0.1"
-    app.kubernetes.io/part-of: kube-prometheus-stack
-    chart: kube-prometheus-stack-20.0.1
-    release: "prometheus-operator"
-    heritage: "Helm"
-rules:
-  - apiGroups:
-      - admissionregistration.k8s.io
-    resources:
-      - validatingwebhookconfigurations
-      - mutatingwebhookconfigurations
-    verbs:
-      - get
-      - update
-  - apiGroups: ['policy']
-    resources: ['podsecuritypolicies']
-    verbs:     ['use']
-    resourceNames:
-    - prometheus-operator-admission
----
-# Source: kube-prometheus-stack/templates/prometheus-operator/admission-webhooks/job-patch/clusterrolebinding.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name:  prometheus-operator-admission
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: kube-prometheus-stack-admission    
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: prometheus-operator
-    app.kubernetes.io/version: "20.0.1"
-    app.kubernetes.io/part-of: kube-prometheus-stack
-    chart: kube-prometheus-stack-20.0.1
-    release: "prometheus-operator"
-    heritage: "Helm"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: prometheus-operator-admission
-subjects:
-  - kind: ServiceAccount
-    name: prometheus-operator-admission
-    namespace: monitoring
----
-# Source: kube-prometheus-stack/templates/prometheus-operator/admission-webhooks/job-patch/role.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name:  prometheus-operator-admission
-  namespace: monitoring
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: kube-prometheus-stack-admission    
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: prometheus-operator
-    app.kubernetes.io/version: "20.0.1"
-    app.kubernetes.io/part-of: kube-prometheus-stack
-    chart: kube-prometheus-stack-20.0.1
-    release: "prometheus-operator"
-    heritage: "Helm"
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - secrets
-    verbs:
-      - get
-      - create
----
-# Source: kube-prometheus-stack/templates/prometheus-operator/admission-webhooks/job-patch/rolebinding.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name:  prometheus-operator-admission
-  namespace: monitoring
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: kube-prometheus-stack-admission    
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: prometheus-operator
-    app.kubernetes.io/version: "20.0.1"
-    app.kubernetes.io/part-of: kube-prometheus-stack
-    chart: kube-prometheus-stack-20.0.1
-    release: "prometheus-operator"
-    heritage: "Helm"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: prometheus-operator-admission
-subjects:
-  - kind: ServiceAccount
-    name: prometheus-operator-admission
-    namespace: monitoring
----
-# Source: kube-prometheus-stack/charts/grafana/templates/tests/test.yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: prometheus-operator-grafana-test
-  labels:
-    helm.sh/chart: grafana-6.17.5
-    app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: prometheus-operator
-    app.kubernetes.io/version: "8.2.3"
-    app.kubernetes.io/managed-by: Helm
-  annotations:
-    "helm.sh/hook": test-success
-  namespace: default
-spec:
-  serviceAccountName: prometheus-operator-grafana-test
-  containers:
-    - name: prometheus-operator-test
-      image: "bats/bats:v1.4.1"
-      imagePullPolicy: "IfNotPresent"
-      command: ["/opt/bats/bin/bats", "-t", "/tests/run.sh"]
-      volumeMounts:
-        - mountPath: /tests
-          name: tests
-          readOnly: true
-  volumes:
-  - name: tests
-    configMap:
-      name: prometheus-operator-grafana-test
-  restartPolicy: Never
----
-# Source: kube-prometheus-stack/templates/prometheus-operator/admission-webhooks/job-patch/job-createSecret.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name:  prometheus-operator-admission-create
-  namespace: monitoring
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: kube-prometheus-stack-admission-create    
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: prometheus-operator
-    app.kubernetes.io/version: "20.0.1"
-    app.kubernetes.io/part-of: kube-prometheus-stack
-    chart: kube-prometheus-stack-20.0.1
-    release: "prometheus-operator"
-    heritage: "Helm"
-spec:
-  template:
-    metadata:
-      name:  prometheus-operator-admission-create
-      labels:
-        app: kube-prometheus-stack-admission-create        
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: prometheus-operator
-        app.kubernetes.io/version: "20.0.1"
-        app.kubernetes.io/part-of: kube-prometheus-stack
-        chart: kube-prometheus-stack-20.0.1
-        release: "prometheus-operator"
-        heritage: "Helm"
-    spec:
-      containers:
-        - name: create
-          image: k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0@sha256:f3b6b39a6062328c095337b4cadcefd1612348fdd5190b1dcbcb9b9e90bd8068
-          imagePullPolicy: IfNotPresent
-          args:
-            - create
-            - --host=prometheus-operator-operator,prometheus-operator-operator.monitoring.svc
-            - --namespace=monitoring
-            - --secret-name=prometheus-operator-admission
-          resources:
-            {}
-      restartPolicy: OnFailure
-      serviceAccountName: prometheus-operator-admission
-      securityContext:
-        runAsGroup: 2000
-        runAsNonRoot: true
-        runAsUser: 2000
----
-# Source: kube-prometheus-stack/templates/prometheus-operator/admission-webhooks/job-patch/job-patchWebhook.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name:  prometheus-operator-admission-patch
-  namespace: monitoring
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: kube-prometheus-stack-admission-patch    
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: prometheus-operator
-    app.kubernetes.io/version: "20.0.1"
-    app.kubernetes.io/part-of: kube-prometheus-stack
-    chart: kube-prometheus-stack-20.0.1
-    release: "prometheus-operator"
-    heritage: "Helm"
-spec:
-  template:
-    metadata:
-      name:  prometheus-operator-admission-patch
-      labels:
-        app: kube-prometheus-stack-admission-patch        
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: prometheus-operator
-        app.kubernetes.io/version: "20.0.1"
-        app.kubernetes.io/part-of: kube-prometheus-stack
-        chart: kube-prometheus-stack-20.0.1
-        release: "prometheus-operator"
-        heritage: "Helm"
-    spec:
-      containers:
-        - name: patch
-          image: k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0@sha256:f3b6b39a6062328c095337b4cadcefd1612348fdd5190b1dcbcb9b9e90bd8068
-          imagePullPolicy: IfNotPresent
-          args:
-            - patch
-            - --webhook-name=prometheus-operator-admission
-            - --namespace=monitoring
-            - --secret-name=prometheus-operator-admission
-            - --patch-failure-policy=Fail
-          resources:
-            {}
-      restartPolicy: OnFailure
-      serviceAccountName: prometheus-operator-admission
-      securityContext:
-        runAsGroup: 2000
-        runAsNonRoot: true
-        runAsUser: 2000
+
